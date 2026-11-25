@@ -1,8 +1,7 @@
 """Библиотека: получает квадратную матрицу с сервера и обходит её по спирали"""
 import asyncio
-import urllib.request
-import urllib.error
 from typing import List
+import aiohttp
 
 
 class MatrixError(Exception):
@@ -14,12 +13,12 @@ def parse_matrix(text: str) -> List[List[int]]:
     rows = []
     for line in text.splitlines():
         line = line.strip()
-        if not line.startswith("|"):         
+        if not line.startswith("|"):
             continue
         try:
             rows.append([int(cell) for cell in line.strip("|").split("|")])
         except ValueError:
-                raise MatrixError(f"в таблице не число: {line}")
+            raise MatrixError(f"в таблице не число: {line}")
     if not rows:
         raise MatrixError("в ответе нет строк матрицы")
     if any(len(row) != len(rows) for row in rows):
@@ -51,16 +50,18 @@ def spiral_traversal(matrix: List[List[int]]) -> List[int]:
     return result
 
 
-def _download(url: str) -> str:
-    """Скачивает текст по URL через стандартную библиотеку"""
+async def _download(url: str) -> str:
     try:
-        with urllib.request.urlopen(url, timeout=30) as response:
-            if response.status >= 400:
-                raise MatrixError(f"сервер вернул код {response.status}: {url}")
-            return response.read().decode("utf-8")
+        async with aiohttp.ClientSession(
+            timeout=aiohttp.ClientTimeout(total=30)
+        ) as session:
+            async with session.get(url) as response:
+                if response.status >= 400:
+                    raise MatrixError(f"сервер вернул код {response.status}: {url}")
+                return await response.text()
     except MatrixError:
         raise
-    except (urllib.error.URLError, urllib.error.HTTPError, TimeoutError) as exc:
+    except (aiohttp.ClientError, asyncio.TimeoutError, TimeoutError) as exc:
         raise MatrixError(f"ошибка сети или сервера: {exc}")
 
 
@@ -68,6 +69,5 @@ async def get_matrix(url: str) -> List[int]:
     """Скачивает матрицу по URL и возвращает её обход по спирали"""
     if not url:
         raise MatrixError("не указан URL")
-    loop = asyncio.get_running_loop()
-    text = await loop.run_in_executor(None, _download, url)
+    text = await _download(url)
     return spiral_traversal(parse_matrix(text))
