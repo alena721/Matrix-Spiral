@@ -1,6 +1,7 @@
 """Библиотека: получает квадратную матрицу с сервера и обходит её по спирали"""
 import asyncio
 import urllib.request
+import urllib.error
 from typing import List
 
 
