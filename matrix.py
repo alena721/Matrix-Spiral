@@ -60,7 +60,7 @@ def _download(url: str) -> str:
             return response.read().decode("utf-8")
     except MatrixError:
         raise
-    except Exception as exc:
+    except (urllib.error.URLError, urllib.error.HTTPError, TimeoutError) as exc:
         raise MatrixError(f"ошибка сети или сервера: {exc}")
 
 
