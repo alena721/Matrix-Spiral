@@ -15,8 +15,10 @@ def parse_matrix(text: str) -> List[List[int]]:
         line = line.strip()
         if not line.startswith("|"):         
             continue
-        rows.append([int(cell) for cell in line.strip("|").split("|")])
-
+        try:
+            rows.append([int(cell) for cell in line.strip("|").split("|")])
+        except ValueError:
+                raise MatrixError(f"в таблице не число: {line}")
     if not rows:
         raise MatrixError("в ответе нет строк матрицы")
     if any(len(row) != len(rows) for row in rows):
