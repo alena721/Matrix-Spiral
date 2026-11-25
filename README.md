@@ -38,6 +38,29 @@
 
 ## Как запустить
 
-Требуется только Python 3.8+. Внешних зависимостей нет.
+## Установка
 
-python -m unittest discover -v   # запуск тестов
+# 1. Активировали виртуальное окружение
+~\manimations\.venv\Scripts\activate
+
+# 2. Попытка установки обычным pip:
+pip install aiohttp
+python -m pip install aiohttp   # если ответ: No module named pip (в uv-окружении pip нет)
+
+# 3. Установка через uv:
+uv pip install aiohttp          # поставила aiohttp 3.14.5 + 8 зависимостей
+
+# 4. Переход в папку проекта
+cd C:\
+
+# 5. Проверка
+python -c "import aiohttp; print('ok', aiohttp.__version__)"
+
+# 6. Прогон тестов
+python -m unittest test_matrix -v   # 8 тестов
+
+## Запуск тестов
+
+cd "C:\..."                                              
+C:\...> python -m unittest test_matrix -v
+
